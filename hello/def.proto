@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-option go_package = "github.com/richardimaoka/go-grpc-streaming";
+option go_package = "github.com/richardimaoka/go-grpc-streaming/hello";
 
 message Point {
   int32 latitude = 1;
