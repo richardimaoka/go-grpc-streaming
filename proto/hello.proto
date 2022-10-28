@@ -1,0 +1,9 @@
+syntax = "proto3";
+
+package go_grpc_streaminsg;
+
+option go_package = "github.com/richardimaoka/grpc-go-streaming/proto";
+
+message Hello { uint32 id = 1; }
+
+service HelloService {}
