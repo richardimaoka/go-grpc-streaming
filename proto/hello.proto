@@ -4,6 +4,10 @@ package go_grpc_streaminsg;
 
 option go_package = "github.com/richardimaoka/grpc-go-streaming/proto";
 
-message Hello { uint32 id = 1; }
+message HelloRequest { uint32 id = 1; }
 
-service HelloService {}
+message HelloResponse { uint32 id = 1; }
+
+service HelloService {
+  rpc HelloManyTimes(HelloRequest) returns (stream HelloResponse);
+}
