@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log"
 
 	pb "github.com/richardimaoka/go-grpc-streaming/proto"
@@ -15,13 +14,28 @@ func (s *Server) Greet(ctx context.Context, in *pb.GreetRequest) (*pb.GreetRespo
 	}, nil
 }
 
+func repeatPull(ch chan string) {
+	for i := 0; i < 10; i++ {
+		ch <- "abc"
+	}
+	close(ch)
+}
+
 func (s *Server) GreetManyTimes(in *pb.GreetRequest, stream pb.GreetService_GreetManyTimesServer) error {
 	log.Printf("GreetManyTimes function was invoked with :%v\n", in)
-	for i := 0; i < 10; i++ {
-		res := fmt.Sprintf("Hello %s, number %d", in.FirstName, i)
+
+	ch := make(chan string)
+	go repeatPull(ch)
+	for {
+		s, ok := <-ch
+		if !ok {
+			break
+		}
+
 		stream.Send(&pb.GreetResponse{
-			Result: res,
+			Result: s,
 		})
+
 	}
 	return nil
 }
