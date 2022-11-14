@@ -15,7 +15,7 @@ func (s *Server) Greet(ctx context.Context, in *pb.GreetRequest) (*pb.GreetRespo
 }
 
 func repeatPull(ch chan string) {
-	for i := 0; i < 10; i++ {
+	for i := 0; i < 2; i++ {
 		ch <- "abc"
 	}
 	close(ch)
