@@ -18,6 +18,119 @@ import (
 // Requires gRPC-Go v1.32.0 or later.
 const _ = grpc.SupportPackageIsVersion7
 
+// ExecCommandStreamingClient is the client API for ExecCommandStreaming service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+type ExecCommandStreamingClient interface {
+	PollCommands(ctx context.Context, in *RegisterClient, opts ...grpc.CallOption) (ExecCommandStreaming_PollCommandsClient, error)
+}
+
+type execCommandStreamingClient struct {
+	cc grpc.ClientConnInterface
+}
+
+func NewExecCommandStreamingClient(cc grpc.ClientConnInterface) ExecCommandStreamingClient {
+	return &execCommandStreamingClient{cc}
+}
+
+func (c *execCommandStreamingClient) PollCommands(ctx context.Context, in *RegisterClient, opts ...grpc.CallOption) (ExecCommandStreaming_PollCommandsClient, error) {
+	stream, err := c.cc.NewStream(ctx, &ExecCommandStreaming_ServiceDesc.Streams[0], "/greet.ExecCommandStreaming/PollCommands", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &execCommandStreamingPollCommandsClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type ExecCommandStreaming_PollCommandsClient interface {
+	Recv() (*ExecCommand, error)
+	grpc.ClientStream
+}
+
+type execCommandStreamingPollCommandsClient struct {
+	grpc.ClientStream
+}
+
+func (x *execCommandStreamingPollCommandsClient) Recv() (*ExecCommand, error) {
+	m := new(ExecCommand)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+// ExecCommandStreamingServer is the server API for ExecCommandStreaming service.
+// All implementations must embed UnimplementedExecCommandStreamingServer
+// for forward compatibility
+type ExecCommandStreamingServer interface {
+	PollCommands(*RegisterClient, ExecCommandStreaming_PollCommandsServer) error
+	mustEmbedUnimplementedExecCommandStreamingServer()
+}
+
+// UnimplementedExecCommandStreamingServer must be embedded to have forward compatible implementations.
+type UnimplementedExecCommandStreamingServer struct {
+}
+
+func (UnimplementedExecCommandStreamingServer) PollCommands(*RegisterClient, ExecCommandStreaming_PollCommandsServer) error {
+	return status.Errorf(codes.Unimplemented, "method PollCommands not implemented")
+}
+func (UnimplementedExecCommandStreamingServer) mustEmbedUnimplementedExecCommandStreamingServer() {}
+
+// UnsafeExecCommandStreamingServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to ExecCommandStreamingServer will
+// result in compilation errors.
+type UnsafeExecCommandStreamingServer interface {
+	mustEmbedUnimplementedExecCommandStreamingServer()
+}
+
+func RegisterExecCommandStreamingServer(s grpc.ServiceRegistrar, srv ExecCommandStreamingServer) {
+	s.RegisterService(&ExecCommandStreaming_ServiceDesc, srv)
+}
+
+func _ExecCommandStreaming_PollCommands_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(RegisterClient)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(ExecCommandStreamingServer).PollCommands(m, &execCommandStreamingPollCommandsServer{stream})
+}
+
+type ExecCommandStreaming_PollCommandsServer interface {
+	Send(*ExecCommand) error
+	grpc.ServerStream
+}
+
+type execCommandStreamingPollCommandsServer struct {
+	grpc.ServerStream
+}
+
+func (x *execCommandStreamingPollCommandsServer) Send(m *ExecCommand) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+// ExecCommandStreaming_ServiceDesc is the grpc.ServiceDesc for ExecCommandStreaming service.
+// It's only intended for direct use with grpc.RegisterService,
+// and not to be introspected or modified (even as a copy)
+var ExecCommandStreaming_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "greet.ExecCommandStreaming",
+	HandlerType: (*ExecCommandStreamingServer)(nil),
+	Methods:     []grpc.MethodDesc{},
+	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "PollCommands",
+			Handler:       _ExecCommandStreaming_PollCommands_Handler,
+			ServerStreams: true,
+		},
+	},
+	Metadata: "proto/greet.proto",
+}
+
 // GreetServiceClient is the client API for GreetService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
