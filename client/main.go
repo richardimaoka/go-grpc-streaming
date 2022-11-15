@@ -1,7 +1,9 @@
 package main
 
 import (
+	"context"
 	"fmt"
+	"io"
 	"log"
 	"math/rand"
 	"os"
@@ -24,6 +26,35 @@ func RandomString(n int) string {
 	return string(s)
 }
 
+func pollCommands(c pb.ExecCommandStreamingClient) {
+	log.Println("pollCommands was invoked")
+
+	req := &pb.RegisterClient{
+		CurrentDirectory:     "",
+		TernminalClientToken: "",
+		AppPageToken:         "",
+	}
+	stream, err := c.PollCommands(context.Background(), req)
+
+	if err != nil {
+		log.Fatalf("Error while calling GreetManyTimes: %v\n", err)
+	}
+
+	for {
+		msg, err := stream.Recv()
+
+		if err == io.EOF {
+			break
+		}
+
+		if err != nil {
+			log.Fatalf("Erro while reading from the stream: %v\n", err)
+		}
+
+		log.Printf("Command: %s\n", msg.Command)
+	}
+}
+
 func main() {
 	curDir, err := os.Getwd()
 	if err != nil {
@@ -40,7 +71,7 @@ func main() {
 	}
 	defer conn.Close()
 
-	c := pb.NewGreetServiceClient(conn)
+	c := pb.NewExecCommandStreamingClient(conn)
+	pollCommands(c)
 
-	doGreetManyTimes(c)
 }
