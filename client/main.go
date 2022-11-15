@@ -1,12 +1,14 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"io"
 	"log"
 	"math/rand"
 	"os"
+	"os/exec"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -52,6 +54,16 @@ func pollCommands(c pb.ExecCommandStreamingClient) {
 		}
 
 		log.Printf("Command: %s\n", msg.Command)
+		cmd := exec.Command("sh", "-c", msg.Command)
+		var stdout, stderr bytes.Buffer
+		cmd.Stdout = &stdout
+		cmd.Stderr = &stderr
+		err = cmd.Run()
+		if err != nil {
+			fmt.Printf("ERROR: %v, %s\n", err, stderr.Bytes())
+			continue
+		}
+		fmt.Printf("%s\n", stdout.Bytes())
 	}
 }
 

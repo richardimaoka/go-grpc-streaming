@@ -14,7 +14,7 @@ type Server struct {
 
 func repeatCommand(ch chan string) {
 	for i := 0; i < 2; i++ {
-		ch <- "abc"
+		ch <- "echo abc"
 	}
 	close(ch)
 }
