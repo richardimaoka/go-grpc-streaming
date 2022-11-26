@@ -19,11 +19,18 @@ func repeatCommand(ch chan string) {
 	close(ch)
 }
 
+func sendCommands(ch chan string) {
+	ch <- "echo abc"
+	ch <- "docker pull nginx"
+	ch <- "docker inspect nginx"
+	close(ch)
+}
+
 func (s *Server) PollCommands(in *pb.RegisterClient, stream pb.ExecCommandStreaming_PollCommandsServer) error {
 	log.Printf("GreetManyTimes function was invoked with :%v\n", in)
 
 	ch := make(chan string)
-	go repeatCommand(ch)
+	go sendCommands(ch)
 	for {
 		cmd, ok := <-ch
 		if !ok {
